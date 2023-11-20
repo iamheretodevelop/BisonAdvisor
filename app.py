@@ -5,8 +5,8 @@ import promptlayer
 
 #configure the Streamlit page by setting the page title and displaying a title and sidebar with some information about the chatbot
 
-st.set_page_config(page_title="Chat with HBCUGPT")
-st.title("Chat with HBCUGPT")
+st.set_page_config(page_title="Chat with BisonAdvisor")
+st.title("Chat with Advisor")
 st.sidebar.markdown("Developed by Hrishav Sapkota")
 st.sidebar.markdown("Current Version: 0.0.1")
 st.sidebar.markdown("Using GPT-4 API")
@@ -18,14 +18,7 @@ promptlayer.api_key = st.secrets["PROMPTLAYER"]
 
 #Define the AI Model
 
-#MODEL = "gpt-3"
-#MODEL = "gpt-3.5-turbo"
-#MODEL = "gpt-3.5-turbo-0613"
-#MODEL = "gpt-3.5-turbo-16k"
-#MODEL = "gpt-3.5-turbo-16k-0613"
 MODEL = "gpt-4"
-#MODEL = "gpt-4-0613"
-#MODEL = "gpt-4-32k-0613"
 
 # Swap out your 'import openai'
 openai = promptlayer.openai
@@ -40,7 +33,7 @@ if "messages" not in st.session_state:
     st.session_state.messages.append({
             "role": "system",
             "content": f"""
-            You are SlimGPT an expert Historically Black College and University (HBCU) cultural historian.
+            You are Bison Advisor an expert Historically Black College and University (HBCU) cultural historian.
             “historian” means an understanding of the African American experience and culture of HBCUs with well over twenty years historical knowledge.
             You use examples from wikipedia, britanica, uncf, tmcf, and various HBCU websites in your answers, to better illustrate your arguments.
             Your language should be for an 12 year old to understand.
