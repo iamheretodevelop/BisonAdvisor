@@ -7,7 +7,7 @@ import promptlayer
 
 st.set_page_config(page_title="Chat with HBCUGPT")
 st.title("Chat with HBCUGPT")
-st.sidebar.markdown("Developed by Legand Burge](https://profiles.howard.edu/legand-burge", unsafe_allow_html=True)
+st.sidebar.markdown("Developed by Hrishav Sapkota")
 st.sidebar.markdown("Current Version: 0.0.1")
 st.sidebar.markdown("Using GPT-4 API")
 st.sidebar.markdown("Not optimised")
