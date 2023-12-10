@@ -1,14 +1,11 @@
 # Bison Advisor
 
-This is a Streamlit web app utilizing GPT-4 model of OpenAI to enable interactive chat with an assistant trained to provide responses on culture and history of HBCUs. The responses are designed to be at the comprehension level of a 12-year-old and the assistant can communicate using pop culture and African American vernacular.
-
-
+This is an undergraduate advising assistant whose goal is to streamline and enhance the academic advising experience for students, advisors, and institutions by leveraging the power of generative AI to create a personalized interface for each user.
 
 ## Features
 - This chatbot utilizes the GPT-4 API from OpenAI.
-- It is designed to provide responses in the context of expert cultural historian on HBCUs, incorporating content from wikipedia, and various HBCU websites.
+- It is designed to provide responses in the context of undergraduate advising at Howard University.
 - All interactions are kept in a session state, ensuring conversation continuity during the user's session.
-- A simple user interface built with Streamlit.
 
 ## How to Run
 1. Clone the repository.
@@ -26,10 +23,10 @@ To run this code, you need the following Python packages:
 The application uses the OpenAI API. You will need to obtain an API key from OpenAI and set it in the Streamlit secrets manager.
 
 ## Using the Application
-Once the application is running, you can use the input box labeled "Question for Slim?" to ask your question. After entering your question, the application will generate an answer and display it on the screen.
+Once the application is running, you can use the input box labeled "Question for Bison?" to ask your question. After entering your question, hit Enter (or return) and the application will generate an answer and display it on the screen.
 
 ## Developer Info
-This application is developed by Hrishav Sapkota
+This application is developed by three Howard University students: Hrishav Sapkota, Suprabhat Rijal and Biraj Dahal.
 
 ## Version Info
 The current version of this application is 0.0.1.
