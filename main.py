@@ -82,16 +82,6 @@ def main():
                 st.session_state['username'] = username
                 st.success(f"Logged In as {username}")
 
-                task = st.selectbox("Task", ["Add Post", "Analytics", "Profiles"])
-                if task == "Add Post":
-                    st.subheader("Add Your Post")
-                elif task == "Analytics":
-                    st.subheader("Analytics")
-                elif task == "Profiles":
-                    st.subheader("User Profiles")
-                    user_result = view_all_users()
-                    clean_db = pd.DataFrame(user_result, columns=["Username", "Password"])
-                    st.dataframe(clean_db)
             else:
                 st.warning("Incorrect Username/Password")
 
