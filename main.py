@@ -26,7 +26,6 @@ def process_pdf(file_path):
     # Convert Document objects into strings
     texts = [str(doc) for doc in documents]
     return texts
-    
 
 def make_hashes(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
@@ -38,6 +37,13 @@ def check_hashes(password,hashed_text):
 
 conn = sqlite3.connect('data.db', check_same_thread=False)
 c = conn.cursor()
+
+def get_transcript(username):
+    c.execute('''
+              SELECT transcript FROM userstable WHERE username = ?
+              ''', (username,))
+    data = c.fetchall()
+    return data
 
 def create_usertable():
     c.execute('''
@@ -86,9 +92,12 @@ def initialize_advising_recommendations_table():
         c.executemany('INSERT INTO advising_recommendations(recommendation) VALUES (?)', recommendations)
         conn.commit()
 
-def chat_with_advisor():
+def chat_with_advisor(username):
     client = OpenAI()
     texts = process_pdf('./doc/CourseInfo.pdf')
+    # print(username)
+    user_transcript = get_transcript(username)
+    print(user_transcript)
     # setup pinecone
     index_name = "course-info"
 
@@ -185,8 +194,6 @@ def add_advising_recommendation(recommendation):
 def get_advising_recommendations():
     c.execute('SELECT * FROM advising_recommendations')
     return c.fetchall()
-
-
 
 def update_student_data(username, email, advisor, student_id, major, current_standing, graduation_year, transcript_file):
     if transcript_file is not None:
@@ -293,10 +300,9 @@ def main():
         elif choice == "Chat with AI Advisor":
             if 'username' in st.session_state and st.session_state['username'] is not None:
                 st.subheader("AI Advising")
-                chat_with_advisor()
+                chat_with_advisor(st.session_state['username'])
             else:
                 st.warning("Please login to view this page")
-
     elif choice == "Profile":
         st.subheader("Profile")
         if 'username' in st.session_state and st.session_state['username'] is not None:
