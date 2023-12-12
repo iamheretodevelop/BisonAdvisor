@@ -1,9 +1,32 @@
+
+
 import streamlit as st
-import pandas as pd
 import hashlib
 import sqlite3
-import openai
-import promptlayer
+from openai import OpenAI
+import pinecone
+import os
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
+from sentence_transformers import SentenceTransformer
+
+def create_embeddings(texts):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings_list = model.encode(texts).tolist()
+    return embeddings_list
+
+def process_pdf(file_path):
+    # create a loader
+    loader = PyPDFLoader(file_path)
+    # load your data
+    data = loader.load()
+    # Split your data up into smaller documents with Chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    documents = text_splitter.split_documents(data)
+    # Convert Document objects into strings
+    texts = [str(doc) for doc in documents]
+    return texts
+    
 
 def make_hashes(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
@@ -64,6 +87,14 @@ def initialize_advising_recommendations_table():
         conn.commit()
 
 def chat_with_advisor():
+    client = OpenAI()
+    texts = process_pdf('./doc/CourseInfo.pdf')
+    # setup pinecone
+    index_name = "course-info"
+
+    pinecone.init(api_key=os.environ['PINECONE_API_KEY'], environment='gcp-starter')
+    index = pinecone.Index(index_name)
+
     st.title("Chat with BisonAdvisor")
 
     st.sidebar.markdown("Developed by Team 6.")
@@ -72,13 +103,8 @@ def chat_with_advisor():
     st.sidebar.markdown("Not optimised")
     st.sidebar.markdown("May run out of OpenAI credits")
 
-    
-    OPENAI_API_KEY = ""
-    promptlayer.api_key = ""
+    MODEL = "gpt-3.5-turbo"
 
-    MODEL = "gpt-4"
-
-    openai = promptlayer.openai
 
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = MODEL
@@ -87,8 +113,16 @@ def chat_with_advisor():
         st.session_state.messages = [
             {
                 "role": "system",
-                "content": """[Your system message content]"""
-            },
+            "content": f"""
+            You are Bison Advisor an expert Historically Black College and University (HBCU) cultural historian.
+            “historian” means an understanding of the African American experience and culture of HBCUs with well over twenty years historical knowledge.
+            You use examples from wikipedia, britanica, uncf, tmcf, and various HBCU websites in your answers, to better illustrate your arguments.
+            Your language should be for an 12 year old to understand.
+            If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
+            Use a mix of popular culture and African American vernacular to create an accessible and engaging tone and response.
+            Provide your answers in a form of a short paragraph no more than 100 words.
+            Start by introducing yourself. You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points.
+            """            },
             {
                 "role": "user",
                 "content": ""
@@ -98,6 +132,8 @@ def chat_with_advisor():
                 "content": ""
             }
         ]
+        # for doc in  docs:
+            # st.session_state.messages.append({"role": "system", "content":f"Course context: {doc}"})
 
     for message in st.session_state.messages:
         if message["role"] in ["user", "assistant"]:
@@ -110,18 +146,25 @@ def chat_with_advisor():
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
+            query = st.session_state.messages[-1]["content"]
+
+            embeddings = create_embeddings([query])[0]
+            docs = index.query(embeddings, top_k=3)["matches"]
             message_placeholder = st.empty()
             full_response = ""
-            for response in openai.ChatCompletion.create(
+            for doc in docs:
+                context = texts[int(doc["id"])]
+                st.session_state.messages[0]["content"] += context
+            for response in client.chat.completions.create(
                 model=st.session_state["openai_model"],
                 messages=[
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.messages
                 ],
                 stream=True,
-                pl_tags=["slimchatbot"],
             ):
-                full_response += response.choices[0].delta.get("content", "")
+                cur_response = response.choices[0].delta.content
+                full_response += cur_response if cur_response is not None else "" 
                 message_placeholder.markdown(full_response + "▌")
             message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
