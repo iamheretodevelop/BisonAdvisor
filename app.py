@@ -30,24 +30,6 @@ promptlayer.api_key = st.secrets["PROMPTLAYER"]
 
 MODEL = "gpt-3.5-turbo"
 
-#pinecone
-# index_name = "langchain-demo"
-
-# pinecone.init(api_key=os.environ['PINECONE_API_KEY'], environment='gcp-starter')
-# index = pinecone.Index("course-info")
-
-
-# langchain
-
-
-# def get_similiar_docs(query, k=2, score=False):
-#   if score:
-#     similar_docs = index.similarity_search_with_score(query, k=k)
-#   else:
-#     similar_docs = index.similarity_search(query, k=k)
-#   return similar_docs
-
-# Swap out your 'import openai'
 openai = promptlayer.openai
 
 if "openai_model" not in st.session_state:
@@ -92,16 +74,18 @@ if prompt := st.chat_input("Ask me anything about HBCUs?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
+        query = st.session_state.messages[-1]["content"]
         message_placeholder = st.empty()
         full_response = ""
-        # similar_docs = get_similiar_docs()
-        for response in client.chat.completions.create(model=st.session_state["openai_model"],
-        messages=[
-            {"role": m["role"], "content": m["content"]}
-            for m in st.session_state.messages
-        ],
-        stream=True):
-            full_response += response.choices[0].delta.get("content", "")
-            message_placeholder.markdown(full_response + "▌")
+        print(query)
+        # # similar_docs = get_similiar_docs()
+        # for response in client.chat.completions.create(model=st.session_state["openai_model"],
+        # messages=[
+        #     {"role": m["role"], "content": m["content"]}
+        #     for m in st.session_state.messages
+        # ],
+        # stream=True):
+        #     full_response += response.choices[0].delta.content
+        #     message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})

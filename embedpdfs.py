@@ -56,15 +56,20 @@ def create_embeddings(texts):
     return embeddings_list
 
 # Define a function to upsert embeddings to Pinecone
-def upsert_embeddings_to_pinecone(index, embeddings, ids):
-    index.upsert(vectors=[(id, embedding) for id, embedding in zip(ids, embeddings)])
+def upsert_embeddings_to_pinecone(index, embeddings, ids, text):
+    index.upsert(vectors=[(id, embedding, {"text": text}) for id, embedding, text in zip(ids, embeddings,text)])
 
 # Process a PDF and create embeddings
-file_path = "./doc/ChemE.pdf"  # Replace with your actual file path
+file_path = "./doc/CourseInfo.pdf"  # Replace with your actual file path
 texts = process_pdf(file_path)
-embeddings = create_embeddings(texts)
 
-# Upsert the embeddings to Pinecone
-upsert_embeddings_to_pinecone(index, embeddings, [file_path])
+count = 1
+for text in texts:
+    # print(text, "\n")
+    embeddings = create_embeddings(texts)
+    print(f"{count}/{len(texts)}")
+
+    count += 1
+    upsert_embeddings_to_pinecone(index, embeddings, [str(i) for i in range(len(texts))], texts)
 
 
