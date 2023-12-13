@@ -8,6 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 from sentence_transformers import SentenceTransformer
 import io
+import PyPDF2
 
 def create_embeddings(texts):
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -42,11 +43,21 @@ def get_transcript(username):
     c.execute('''
               SELECT transcript FROM userstable WHERE username = ?
               ''', (username,))
-    data =c.fetchall()
-    return data
+    data =c.fetchall()[0][0]
 
-    with io.BytesIO(data) as blob_io:
-        print(blob_io.read())
+    data = io.BytesIO(data)
+
+    reader = PyPDF2.PdfReader(data)
+    count = len(reader.pages)
+
+    output = ""
+    for i in range(count):
+        page = reader.pages[i]
+        output += page.extract_text()
+
+    return output
+
+
 
     return "Apple"
 
@@ -100,10 +111,7 @@ def initialize_advising_recommendations_table():
 def chat_with_advisor(username):
     client = OpenAI()
     texts = process_pdf('./doc/CourseInfo.pdf')
-    # print(username)
     user_transcript = get_transcript(username)
-    print(type(user_transcript[0]))
-    # setup pinecone
     index_name = "course-info"
 
     pinecone.init(api_key=os.environ['PINECONE_API_KEY'], environment='gcp-starter')
@@ -135,7 +143,7 @@ def chat_with_advisor(username):
             If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
             Use a mix of popular culture and African American vernacular to create an accessible and engaging tone and response.
             Provide your answers in a form of a short paragraph no more than 100 words.
-            Start by introducing yourself. You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points.
+            Start by introducing yourself. You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points. Transcript is provided so use that to personalize the advising process
             """            },
             {
                 "role": "user",
@@ -169,6 +177,7 @@ def chat_with_advisor(username):
             for doc in docs:
                 context = texts[int(doc["id"])]
                 st.session_state.messages[0]["content"] += context
+            st.session_state.messages[0]["contest"] += f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
             for response in client.chat.completions.create(
                 model=st.session_state["openai_model"],
                 messages=[
