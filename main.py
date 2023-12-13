@@ -10,6 +10,11 @@ from sentence_transformers import SentenceTransformer
 import io
 import PyPDF2
 
+OPENAI_API_KEY="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"
+PINECONE_ENV="gcp-starter"
+PINECONE_API_KEY="46d72819-8c78-4d98-b5c3-0f3320dcc4ca"
+PROMPTLAYER="pl_bd3c669ffb9f07b511c2ea54feb2f333"
+
 def create_embeddings(texts):
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings_list = model.encode(texts).tolist()
@@ -114,7 +119,7 @@ def chat_with_advisor(username):
     user_transcript = get_transcript(username)
     index_name = "course-info"
 
-    pinecone.init(api_key=os.environ['PINECONE_API_KEY'], environment='gcp-starter')
+    pinecone.init(api_key=PINECONE_API_KEY, environment='gcp-starter')
     index = pinecone.Index(index_name)
 
     st.title("Chat with BisonAdvisor")
