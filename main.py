@@ -7,6 +7,7 @@ import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 from sentence_transformers import SentenceTransformer
+import io
 
 def create_embeddings(texts):
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -37,6 +38,18 @@ def check_hashes(password,hashed_text):
 conn = sqlite3.connect('data.db', check_same_thread=False)
 c = conn.cursor()
 
+def get_transcript(username):
+    c.execute('''
+              SELECT transcript FROM userstable WHERE username = ?
+              ''', (username,))
+    data =c.fetchall()
+    return data
+
+    with io.BytesIO(data) as blob_io:
+        print(blob_io.read())
+
+    return "Apple"
+
 def create_usertable():
     c.execute('''
         CREATE TABLE IF NOT EXISTS userstable(
@@ -60,7 +73,7 @@ def add_userdata(username, password, role, email, advisor, student_id, major, cu
 
 def login_user(username, password):
     c.execute('SELECT * FROM userstable WHERE username = ? AND password = ?', (username, password))
-    data = c.fetchall()
+    data = c.fetchone()
     return data
 
 def view_all_users():
@@ -89,7 +102,7 @@ def chat_with_advisor(username):
     texts = process_pdf('./doc/CourseInfo.pdf')
     # print(username)
     user_transcript = get_transcript(username)
-    print("asdfafd")
+    print(type(user_transcript[0]))
     # setup pinecone
     index_name = "course-info"
 
