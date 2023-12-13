@@ -97,7 +97,7 @@ def chat_with_advisor(username):
     texts = process_pdf('./doc/CourseInfo.pdf')
     # print(username)
     user_transcript = get_transcript(username)
-    print(user_transcript)
+    print("asdfafd")
     # setup pinecone
     index_name = "course-info"
 
@@ -297,12 +297,12 @@ def main():
                 add_userdata(new_user, make_hashes(new_password), new_role, new_email, new_advisor, new_student_id, new_major, new_current_standing, new_graduation_year, new_transcript)
                 st.success("You have successfully created a valid Account")
                 st.info("Go to Login Menu to login")
-        elif choice == "Chat with AI Advisor":
-            if 'username' in st.session_state and st.session_state['username'] is not None:
-                st.subheader("AI Advising")
-                chat_with_advisor(st.session_state['username'])
-            else:
-                st.warning("Please login to view this page")
+    elif choice == "Chat with AI Advisor":
+        if 'username' in st.session_state and st.session_state['username'] is not None:
+            st.subheader("AI Advising")
+            chat_with_advisor(st.session_state['username'])
+        else:
+            st.warning("Please login to view this page")
     elif choice == "Profile":
         st.subheader("Profile")
         if 'username' in st.session_state and st.session_state['username'] is not None:
