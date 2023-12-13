@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import hashlib
 import sqlite3
@@ -27,6 +25,7 @@ def process_pdf(file_path):
     texts = [str(doc) for doc in documents]
     return texts
 
+
 def make_hashes(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
 
@@ -37,13 +36,6 @@ def check_hashes(password,hashed_text):
 
 conn = sqlite3.connect('data.db', check_same_thread=False)
 c = conn.cursor()
-
-def get_transcript(username):
-    c.execute('''
-              SELECT transcript FROM userstable WHERE username = ?
-              ''', (username,))
-    data = c.fetchall()
-    return data
 
 def create_usertable():
     c.execute('''
@@ -195,6 +187,8 @@ def get_advising_recommendations():
     c.execute('SELECT * FROM advising_recommendations')
     return c.fetchall()
 
+
+
 def update_student_data(username, email, advisor, student_id, major, current_standing, graduation_year, transcript_file):
     if transcript_file is not None:
         transcript = transcript_file.read()
@@ -213,6 +207,7 @@ def get_user_data(username):
     return c.fetchone()
 
 def main():
+
     initialize_deadlines_table()
     initialize_advising_recommendations_table()
     st.title("Bison Advisor")
@@ -268,7 +263,6 @@ def main():
         new_role = st.radio("Select Role", ["Student", "Teacher", "Administrator"])
 
         if st.button("Check Username Availability"):
-            create_usertable()
             user_data = get_user_data(new_user)
             if user_data:
                 st.warning("Username already exists. Please choose a different username.")
@@ -277,32 +271,36 @@ def main():
 
         new_student_id = st.text_input("ID")
         new_major = st.text_input("Major" if new_role == "Student" else "Department")
-        new_advisor = None
+        new_advisor = None  
         if new_role == "Student":
             advisor_options = ["Legand Burge", "Jeremy Blackstone", "Brandon Ash", "Ladan Johnson"]
             new_advisor = st.selectbox("Select Advisor", [""] + advisor_options)
 
-        new_current_standing = st.selectbox("Current Standing" if new_role == "Student" else "Job Position", [""] + ["Freshman", "Sophomore", "Junior", "Senior"] if new_role == "Student" else [""] + ["Assistant Professor", "Associate Professor", "Professor", "Teaching Assistant", "Non-teaching Acadmic Advisor"] if new_role == "Teacher" else [""] + ["Admin User", "Super User"])
+        new_current_standing = st.selectbox("Current Standing" if new_role == "Student" else "Job Position", [""] + ["Freshman", "Sophomore", "Junior", "Senior"] if new_role == "Student" else [""] + ["Assistant Professor", "Associate Professor", "Professor", "Teaching Assistant", "Non-teaching Acadmic Advisor"] if new_role == "Teacher" else [""] + ["Admin User", "Super User"] )
         new_graduation_year = st.text_input("Graduation Year" if new_role == "Student" else "Employment Year")
         new_transcript = st.file_uploader("Upload Transcript", type=['pdf']) if new_role == "Student" else None
+
 
         if st.button("Sign Up"):
             user_data = get_user_data(new_user)
             if user_data:
                 st.warning("Username already exists. Please choose a different username.")
-            else:
+            elif new_user and new_password and new_role:
                 create_usertable()
                 if new_transcript:
                     new_transcript = new_transcript.read()
                 add_userdata(new_user, make_hashes(new_password), new_role, new_email, new_advisor, new_student_id, new_major, new_current_standing, new_graduation_year, new_transcript)
                 st.success("You have successfully created a valid Account")
                 st.info("Go to Login Menu to login")
+            else:
+                st.error("All fields are required.")
     elif choice == "Chat with AI Advisor":
         if 'username' in st.session_state and st.session_state['username'] is not None:
             st.subheader("AI Advising")
             chat_with_advisor(st.session_state['username'])
         else:
             st.warning("Please login to view this page")
+
     elif choice == "Profile":
         st.subheader("Profile")
         if 'username' in st.session_state and st.session_state['username'] is not None:
