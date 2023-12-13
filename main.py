@@ -114,7 +114,7 @@ def initialize_advising_recommendations_table():
         conn.commit()
 
 def chat_with_advisor(username):
-    client = OpenAI(api_key="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")
+    client = OpenAI(api_key="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")
     texts = process_pdf('./doc/CourseInfo.pdf')
     user_transcript = get_transcript(username)
     index_name = "course-info"
