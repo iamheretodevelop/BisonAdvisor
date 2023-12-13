@@ -177,7 +177,7 @@ def chat_with_advisor(username):
             for doc in docs:
                 context = texts[int(doc["id"])]
                 st.session_state.messages[0]["content"] += context
-            st.session_state.messages[0]["contest"] += f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
+            st.session_state.messages[0]["content"] += f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
             for response in client.chat.completions.create(
                 model=st.session_state["openai_model"],
                 messages=[
