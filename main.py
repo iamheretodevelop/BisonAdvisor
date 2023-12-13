@@ -171,7 +171,7 @@ def chat_with_advisor(username):
             query = st.session_state.messages[-1]["content"]
 
             embeddings = create_embeddings([query])[0]
-            docs = index.query(embeddings, top_k=3)["matches"]
+            docs = index.query(embeddings, top_k=2)["matches"]
             message_placeholder = st.empty()
             full_response = ""
             for doc in docs:
