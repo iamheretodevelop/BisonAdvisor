@@ -12,7 +12,7 @@ import PyPDF2
 
 # OPENAI_API_KEY="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"
 # PINECONE_ENV="gcp-starter"
-PINECONE_API_KEY="46d72819-8c78-4d98-b5c3-0f3320dcc4ca"
+PINECONE_API_KEY=os.environ['PINECONE_API_KEY']
 # PROMPTLAYER="pl_bd3c669ffb9f07b511c2ea54feb2f333"
 
 def create_embeddings(texts):
@@ -114,7 +114,7 @@ def initialize_advising_recommendations_table():
         conn.commit()
 
 def chat_with_advisor(username):
-    client = OpenAI(api_key="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")
+    client = OpenAI()
     texts = process_pdf('./doc/CourseInfo.pdf')
     user_transcript = get_transcript(username)
     index_name = "course-info"
