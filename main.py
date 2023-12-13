@@ -10,10 +10,10 @@ from sentence_transformers import SentenceTransformer
 import io
 import PyPDF2
 
-OPENAI_API_KEY="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"
-PINECONE_ENV="gcp-starter"
+# OPENAI_API_KEY="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"
+# PINECONE_ENV="gcp-starter"
 PINECONE_API_KEY="46d72819-8c78-4d98-b5c3-0f3320dcc4ca"
-PROMPTLAYER="pl_bd3c669ffb9f07b511c2ea54feb2f333"
+# PROMPTLAYER="pl_bd3c669ffb9f07b511c2ea54feb2f333"
 
 def create_embeddings(texts):
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -143,21 +143,14 @@ def chat_with_advisor(username):
             "content": f"""
             You are Bison Advisor an expert Historically Black College and University (HBCU) cultural historian.
             “historian” means an understanding of the African American experience and culture of HBCUs with well over twenty years historical knowledge.
+            You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points. Transcript is provided so use that to personalize the advising process
             You use examples from wikipedia, britanica, uncf, tmcf, and various HBCU websites in your answers, to better illustrate your arguments.
             Your language should be for an 12 year old to understand.
             If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
             Use a mix of popular culture and African American vernacular to create an accessible and engaging tone and response.
             Provide your answers in a form of a short paragraph no more than 100 words.
-            Start by introducing yourself. You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points. Transcript is provided so use that to personalize the advising process
-            """            },
-            {
-                "role": "user",
-                "content": ""
-            },
-            {
-                "role": "assistant",
-                "content": ""
-            }
+            """  +f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
+                }, 
         ]
         # for doc in  docs:
             # st.session_state.messages.append({"role": "system", "content":f"Course context: {doc}"})
@@ -173,16 +166,34 @@ def chat_with_advisor(username):
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            query = st.session_state.messages[-1]["content"]
+
+            query = ""
+            for message in st.session_state.messages:
+                if message['role'] == "user":
+                    query += message["content"]
+
 
             embeddings = create_embeddings([query])[0]
-            docs = index.query(embeddings, top_k=2)["matches"]
+            docs = index.query(embeddings, top_k=3)["matches"]
             message_placeholder = st.empty()
             full_response = ""
+            new_context =             {
+                "role": "system",
+            "content": f"""
+            You are Bison Advisor an expert Historically Black College and University (HBCU) cultural historian.
+            “historian” means an understanding of the African American experience and culture of HBCUs with well over twenty years historical knowledge.
+            You are given a bunch of Course information from Howard University as context use them to answer any question relating to course work. Answer only for Howard University. Answer in bullet points. Transcript is provided so use that to personalize the advising process
+            You use examples from wikipedia, britanica, uncf, tmcf, and various HBCU websites in your answers, to better illustrate your arguments.
+            Your language should be for an 12 year old to understand.
+            If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
+            Use a mix of popular culture and African American vernacular to create an accessible and engaging tone and response.
+            Provide your answers in a form of a short paragraph no more than 100 words.
+            """  +f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
+            + "Course requirement documents are provided here:"} 
             for doc in docs:
                 context = texts[int(doc["id"])]
-                st.session_state.messages[0]["content"] += context
-            st.session_state.messages[0]["content"] += f"Here is the user transcript of the user including grades, standing and courses taken: {user_transcript}"
+                new_context["content"] += context
+            st.session_state.messages[0] = new_context
             for response in client.chat.completions.create(
                 model=st.session_state["openai_model"],
                 messages=[
