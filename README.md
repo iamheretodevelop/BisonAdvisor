@@ -10,7 +10,7 @@ This is an undergraduate advising assistant whose goal is to streamline and enha
 ## How to Run
 1. Clone the repository.
 2. Set the OpenAI API key in the Streamlit secrets manager.
-3. Run the streamlit app using the command streamlit run SlimGPT.py.
+3. Run the streamlit app using the command ```streamlit run app.py```
 
 ## Dependencies
 To run this code, you need the following Python packages:
@@ -18,12 +18,18 @@ To run this code, you need the following Python packages:
 - openai
 - streamlit
 - streamlit-chat
+- hashlib
+- sqlite3
+- pinecone
+- os
+- langchain
+- sentence-transformers
 
 ### API Keys
 The application uses the OpenAI API. You will need to obtain an API key from OpenAI and set it in the Streamlit secrets manager.
 
 ## Using the Application
-Once the application is running, you can use the input box labeled "Question for Bison?" to ask your question. After entering your question, hit Enter (or return) and the application will generate an answer and display it on the screen.
+Once the application is running, you can access the chatbot and use the input box to ask your question. After entering your question, hit Enter (or return) and the application will generate an answer and display it on the screen.
 
 ## Developer Info
 This application is developed by three Howard University students: Hrishav Sapkota, Suprabhat Rijal and Biraj Dahal.
